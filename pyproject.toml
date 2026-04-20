@@ -1,0 +1,38 @@
+[project]
+name = "bmrs-settlement-analytics"
+version = "0.1.0"
+description = "Automated post-trade analysis for the previous settlement day using Elexon BMRS data."
+authors = [
+    { name = "Ashley Arain", email = "ashleyarain@hotmail.com" }
+]
+dependencies = [
+    "pandas>=2.1.0",
+    "matplotlib>=3.8.0",
+    "httpx>=0.24.0",
+    "pydantic>=2.0.0",
+    "tenacity>=8.2.0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+# Allows the user to run 'make-report' from the terminal
+make-report = "energy_report.main:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+fixable = ["ALL"]
+select = ["E", "F", "I", "B", "UP"]

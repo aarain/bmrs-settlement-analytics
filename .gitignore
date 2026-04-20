@@ -1,0 +1,25 @@
+# Pycharm settings
+.idea/
+.DS_Store
+
+# Virtual Environment
+.venv/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Metadata from 'pip install -e .'
+*.egg-info/
+build/
+dist/
+
+# Testing
+.pytest_cache/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Environment Variables e.g. (secret) BMRS API key
+.env

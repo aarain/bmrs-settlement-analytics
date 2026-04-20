@@ -1,0 +1,18 @@
+# Include dependencies from pyproject.tom
+-e .
+
+# Version synchronisation
+pip-tools
+
+# Testing
+pytest
+pytest-mock
+
+# Git config
+pre-commit
+
+# Linting
+ruff
+
+# Environment
+python-dotenv
