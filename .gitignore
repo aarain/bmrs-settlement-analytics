@@ -20,6 +20,3 @@ dist/
 # Coverage reports
 .coverage
 htmlcov/
-
-# Environment Variables e.g. (secret) BMRS API key
-.env
