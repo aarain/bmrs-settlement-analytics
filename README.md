@@ -10,3 +10,5 @@ which is safe to commit to a public repository. The GitHub secrets manager must 
 requred to decrypt the API key, injecting it into the runtime environment. This ensures that no secrets are exposed in
 the repository, and the API key is not saved in plaintext on any local device.
 * Include unit tests for logging.
+* Modify the `tenacity` decorator in the client to only retry specific errors i.e. most 500 errors should be retried
+but most 400 errors should not.

@@ -68,3 +68,39 @@ def test_get_system_prices_success_with_no_data(client, mocker):
     result = client.get_system_prices(SETTLEMENT_DATE)
 
     assert result == {}
+
+
+def test_get_system_prices_success_after_retries(client, mocker):
+    # Mock the sleep to make it instantaneous, regardless of the number of retry attempts.
+    mocker.patch("tenacity.nap.time.sleep", side_effect=None)
+
+    mock_get = mocker.patch.object(httpx.Client, "get")
+    # Mock 2 failures followed by 1 success
+    mock_get.side_effect = [
+        httpx.HTTPStatusError(message="Error", request=mocker.Mock(), response=mocker.Mock(status_code=503)),
+        httpx.HTTPStatusError(message="Error", request=mocker.Mock(), response=mocker.Mock(status_code=503)),
+        mocker.Mock(status_code=200, json=lambda: {"data": "success"})
+    ]
+
+    result = client.get_system_prices(SETTLEMENT_DATE)
+
+    assert result == {"data": "success"}
+    assert mock_get.call_count == 3
+
+
+def test_get_system_prices_error_after_retries(client, mocker):
+    # Mock the sleep to make it instantaneous, regardless of the number of retry attempts.
+    mocker.patch("tenacity.nap.time.sleep", side_effect=None)
+
+    mock_get = mocker.patch.object(httpx.Client, "get")
+    # Mock the same failure (every time).
+    mock_get.side_effect = httpx.HTTPStatusError(
+        message="Error",
+        request=mocker.Mock(),
+        response=mocker.Mock(status_code=500)
+    )
+
+    with pytest.raises(httpx.HTTPStatusError):
+        client.get_system_prices(SETTLEMENT_DATE)
+
+    assert mock_get.call_count == 3
