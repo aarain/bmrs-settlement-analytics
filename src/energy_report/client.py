@@ -14,7 +14,7 @@ def log_retry(retry_state):
     )
 
 class ElexonClient:
-    BASE_URL = "https://api.data.elexon.co.uk/v1"
+    BASE_URL = "https://data.elexon.co.uk/bmrs/api/v1"
     # The system prices GET URL is /balancing/settlement/system-prices/{settlementDate}
     PRICES_URL_PREFIX = "/balancing/settlement/system-prices/"
 
@@ -25,7 +25,10 @@ class ElexonClient:
     @retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type(httpx.HTTPStatusError),
+        retry=(
+                retry_if_exception_type(httpx.ConnectError) |
+                retry_if_exception_type(httpx.HTTPStatusError)
+        ),
         before_sleep=log_retry,
         reraise=True
     )
