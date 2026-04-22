@@ -1,8 +1,5 @@
 import pandas as pd
-import logging
 from typing import Dict, Any
-
-logger = logging.getLogger(__name__)
 
 
 class SettlementProcessor:
@@ -30,6 +27,13 @@ class SettlementProcessor:
 
         # Extract the relevant columns and rename them to something more Pythonic.
         data_frame = data_frame[list(self.columns_map.keys())].rename(columns=self.columns_map)
+
+        # Protect against numerical values being strings in the received JSON by doing an explicit conversion.
+        for col in ["sell_price", "buy_price", "niv"]:
+            data_frame[col] = pd.to_numeric(data_frame[col], errors="coerce")
+
+        # Sort values by creation time to ensure that the most recent duplicate is kept below.
+        data_frame = data_frame.sort_values("creation_time", ascending=True)
 
         # Handle duplicates by keeping the latest row if multiple rows exist for a period.
         data_frame = data_frame.drop_duplicates(subset=["period"], keep="last")

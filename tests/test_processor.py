@@ -87,6 +87,33 @@ def test_process_prices_handles_missing_periods(processor, raw_data):
     assert pd.isna(period_2["niv"].values[0])
 
 
+def test_process_prices_enforces_numeric_types(processor, raw_data):
+    raw_data["data"][0]["systemSellPrice"] = "50.5"
+
+    data_frame = processor.process_prices(raw_data)
+
+    assert pd.api.types.is_float_dtype(data_frame["sell_price"])
+    assert data_frame.loc[data_frame["period"] == 1, "sell_price"].values[0] == 50.5
+
+
+def test_process_prices_coerces_invalid_numeric_data(processor, raw_data):
+    raw_data["data"][0]["systemSellPrice"] = "not a number"
+
+    data_frame = processor.process_prices(raw_data)
+
+    assert pd.isna(data_frame.loc[data_frame["period"] == 1, "sell_price"].values[0])
+
+
+def test_process_prices_sorts_by_creation_time(processor, raw_data):
+    newest_date_time = "3000-09-17T15:31:12Z"
+    raw_data["data"][0]["createdDateTime"] = newest_date_time
+    raw_data["data"][1]["settlementPeriod"] = 1
+
+    data_frame = processor.process_prices(raw_data)
+
+    assert data_frame.loc[data_frame["period"] == 1, "creation_time"].values[0] == newest_date_time
+
+
 def test_reindex_forty_eight_periods_exact_index(processor):
     data_frame_in = pd.DataFrame({
         "period": [10, 20] # This data frame has fewer than 48 periods (2 periods).
