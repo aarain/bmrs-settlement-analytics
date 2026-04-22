@@ -1,0 +1,99 @@
+import pytest
+import pandas as pd
+from energy_report.processor import SettlementProcessor
+
+
+@pytest.fixture
+def processor():
+    return SettlementProcessor()
+
+@pytest.fixture()
+def raw_data():
+    return {
+        "data": [
+            {
+                "settlementPeriod": 1,
+                "createdDateTime": "2023-09-17T15:31:12Z",
+                "systemSellPrice": 50,
+                "systemBuyPrice": 60,
+                "netImbalanceVolume": 100
+            },
+            {
+                "settlementPeriod": 2,
+                "createdDateTime": "2023-09-17T16:00:00Z",
+                "systemSellPrice": 55,
+                "systemBuyPrice": 65,
+                "netImbalanceVolume": -20
+            }
+        ]
+    }
+
+
+def test_process_prices_success(processor, raw_data):
+    data_frame = processor.process_prices(raw_data)
+
+    assert len(data_frame) == 48
+    assert list(data_frame.columns) == ["period", "creation_time", "sell_price", "buy_price", "niv"]
+
+    period_1 = data_frame[data_frame["period"] == 1]
+    assert period_1["creation_time"].values[0] == "2023-09-17T15:31:12Z"
+    assert period_1["sell_price"].values[0] == 50
+    assert period_1["buy_price"].values[0] == 60
+    assert period_1["niv"].values[0] == 100
+    period_2 = data_frame[data_frame["period"] == 2]
+    assert period_2["creation_time"].values[0] == "2023-09-17T16:00:00Z"
+    assert period_2["sell_price"].values[0] == 55
+    assert period_2["buy_price"].values[0] == 65
+    assert period_2["niv"].values[0] == -20
+
+
+def test_process_prices_success_empty_data_frame(processor):
+    raw_data = {"data": []}
+    data_frame = processor.process_prices(raw_data)
+
+    assert len(data_frame) == 48
+
+    # The period column is still indexed 1-48 so drop it before checking everything else is NaN.
+    assert data_frame.drop(columns=['period']).isna().values.all()
+
+
+def test_process_prices_handles_duplicates(processor, raw_data):
+    raw_data["data"][1]["settlementPeriod"] = 1
+
+    data_frame = processor.process_prices(raw_data)
+
+    assert len(data_frame) == 48
+
+    # period 1 should contain the last processed period 1 values.
+    period_1 = data_frame[data_frame["period"] == 1]
+    assert period_1["creation_time"].values[0] == "2023-09-17T16:00:00Z"
+    assert period_1["sell_price"].values[0] == 55
+    assert period_1["buy_price"].values[0] == 65
+    assert period_1["niv"].values[0] == -20
+
+
+def test_process_prices_handles_missing_periods(processor, raw_data):
+    raw_data["data"][1]["settlementPeriod"] = 3
+
+    data_frame = processor.process_prices(raw_data)
+
+    assert len(data_frame) == 48
+
+    # period 2 should exist but contain NaN values.
+    period_2 = data_frame[data_frame["period"] == 2]
+    assert pd.isna(period_2["creation_time"].values[0])
+    assert pd.isna(period_2["sell_price"].values[0])
+    assert pd.isna(period_2["buy_price"].values[0])
+    assert pd.isna(period_2["niv"].values[0])
+
+
+def test_reindex_forty_eight_periods_exact_index(processor):
+    data_frame_in = pd.DataFrame({
+        "period": [10, 20] # This data frame has fewer than 48 periods (2 periods).
+    })
+
+    data_frame_out = processor._reindex_forty_eight_periods(data_frame_in)
+
+    assert len(data_frame_out) == 48
+    assert data_frame_out["period"].iloc[0] == 1
+    assert data_frame_out["period"].iloc[-1] == 48
