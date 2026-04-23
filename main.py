@@ -1,5 +1,6 @@
 import logging
 import sys
+from datetime import date, timedelta
 from energy_report.client import ElexonClient
 from energy_report.processor import SettlementProcessor
 
@@ -33,11 +34,11 @@ def get_daily_report(settlement_date: str, client=None, processor=None):
 
 
 if __name__ == "__main__":
-    # TODO: use a dynamic argparser instead of this hard-coded string
-    TARGET_DATE = "2024-02-01"
+    date_yesterday = date.today() - timedelta(days=1)
+    report_date = date_yesterday.isoformat()
 
     try:
-        get_daily_report(TARGET_DATE)
+        get_daily_report(report_date)
     except Exception as e:
         logger.error(f"Error getting daily report: {e}")
         sys.exit(1)
