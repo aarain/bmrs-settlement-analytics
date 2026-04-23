@@ -69,6 +69,8 @@ absolute (non-negative) net imbalance volume at period $n$.
 This ensures that if Elexon were to rename any of them, our code only has to change once rather than everywhere the
 field is referenced.
 * Assumption: A UK Settlement Day runs from 23:00 to 23:00 GMT, but the Elexon API handles this abstraction.
+* Assumption: `netImbalanceVolume` is measured in megawatt hours and the system buy/sell prices are measured in
+£ per megawatt hour. 
 
 Future development:
 * Include an `api_key` member in the `ElexonClient` class for any future endpoints which require an API key.

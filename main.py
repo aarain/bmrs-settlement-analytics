@@ -27,10 +27,17 @@ def get_daily_report(settlement_date: str, client=None, processor=None):
 
     logger.info(f"Successfully processed {len(clean_data_frame)} periods.")
 
-    # TODO: replace this print with deliverable 3 - visualisation (plotting)
-    print(clean_data_frame)
+    metrics = processor.calculate_metrics(clean_data_frame)
+    cost = metrics["total_daily_imbalance_cost"]
+    rate = metrics["daily_imbalance_unit_rate"]
 
-    return clean_data_frame
+    print(f"****** Metrics for {settlement_date} ******")
+    print(f"Total daily imbalance cost: £{cost:.2f}")
+    print(f"Daily imbalance unit rate: £{rate:.2f}/MWh")
+
+    # TODO:visualisation (plotting)
+
+    return metrics
 
 
 if __name__ == "__main__":

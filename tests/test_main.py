@@ -9,10 +9,17 @@ def test_get_daily_report_success(mocker):
     mock_processor = mocker.Mock()
 
     mock_raw_data = {"data": "some_raw_json"}
-    mock_data_frame = pd.DataFrame({"period": range(1, 49)})
+    mock_data_frame = pd.DataFrame({
+        "period": range(1, 49)
+    })
+    mock_metrics = {
+        "total_daily_imbalance_cost": 56.80,
+        "daily_imbalance_unit_rate": 77.41
+    }
 
     mock_client.get_system_prices.return_value = mock_raw_data
     mock_processor.process_prices.return_value = mock_data_frame
+    mock_processor.calculate_metrics.return_value = mock_metrics
 
     ### Test the function
 
@@ -22,5 +29,5 @@ def test_get_daily_report_success(mocker):
     mock_client.get_system_prices.assert_called_once_with(test_date)
     mock_processor.process_prices.assert_called_once_with(mock_raw_data)
 
-    assert isinstance(result, pd.DataFrame)
-    assert len(result) == 48
+    assert result["total_daily_imbalance_cost"] == mock_metrics["total_daily_imbalance_cost"]
+    assert result["daily_imbalance_unit_rate"] == mock_metrics["daily_imbalance_unit_rate"]
