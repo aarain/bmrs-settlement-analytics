@@ -46,8 +46,18 @@ The following command runs the full test suite:
    ```
 
 ## Assumptions and Trade-offs
-
-TODO
+* Total daily imbalance cost = $\sum\limits_{n=1}^{48} (V_n \times P_n)$, such that $n$ is the period number, $V_n$ is
+the net imbalance volume (at period $n$), and $P_n$ is either the system sell price (when $V_n < 0$) or the system buy
+price (when $V_n > 0$).
+  * Notation: $\sum\limits_{x=1}^{48} x = 1+2+3+...+48$.
+  * The system sell price and system buy price are values defined relative to the national grid.
+    * When the system has a surplus of energy (is "long"), the net imbalance volume is negative and the system needs
+to sell energy, so we calculate the sum use the system sell price value.
+    * When the system has a deficit of energy (is "short"), the net imbalance volume is positive and the system needs
+to buy energy, so we calculate the sum use the system buy price value.
+* Daily imbalance unit rate = Total daily imbalance cost / Total absolute volume.
+  * Total absolute volume = $\sum\limits_{n=1}^{48} |V_n|$, such that $n$ is the period number, and $|V_n|$ is the
+absolute (non-negative) net imbalance volume at period $n$. 
 
 ## Notes
 
@@ -74,3 +84,4 @@ currently the settlement system prices only return a `netImbalanceVolume`.
 * Structure the project so that the logic from `main.py` is moved to another file within the `energy_report` package,
 and `main.py` just the entry point for the script.
 * Allow the user to specify the desired report date when running the script.
+* Handle NaN values better when calculating metrics since ignoring entire periods can skew calculations.

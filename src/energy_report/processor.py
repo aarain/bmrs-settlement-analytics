@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from typing import Dict, Any
 
@@ -50,3 +51,30 @@ class SettlementProcessor:
         data_frame = data_frame.set_index("period").reindex(full_index).reset_index()
 
         return data_frame
+
+    def calculate_metrics(self, df: pd.DataFrame) -> Dict[str, float]:
+        """Calculate the "Total daily imbalance cost" and the "Daily imbalance unit rate"."""
+
+        # Drop rows which are missing vital calculation data to ensure there are no divide-by-zero errors.
+        # Use a copy of the data frame so that new columns can be added.
+        temp_data_frame = df.dropna(subset=["sell_price", "buy_price", "niv"]).copy()
+
+        # Add a new column to the temporary data frame which selects either the sell price or buy price.
+        temp_data_frame["imb_price"] = np.where(
+            temp_data_frame["niv"] < 0,
+            temp_data_frame["sell_price"],
+            temp_data_frame["buy_price"]
+        )
+
+        # Add a new column to calculate the imbalance cost at each period.
+        temp_data_frame["imb_cost"] = temp_data_frame["niv"] * temp_data_frame["imb_price"]
+
+        total_daily_imbalance_cost = temp_data_frame["imb_cost"].sum()
+
+        total_absolute_volume = temp_data_frame["niv"].abs().sum()
+        daily_imbalance_unit_rate = (total_daily_imbalance_cost / total_absolute_volume) if total_absolute_volume != 0 else 0
+
+        return {
+            "total_daily_imbalance_cost": total_daily_imbalance_cost,
+            "daily_imbalance_unit_rate": daily_imbalance_unit_rate
+        }

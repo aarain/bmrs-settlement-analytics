@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import pandas as pd
 from energy_report.processor import SettlementProcessor
@@ -124,3 +125,39 @@ def test_reindex_forty_eight_periods_exact_index(processor):
     assert len(data_frame_out) == 48
     assert data_frame_out["period"].iloc[0] == 1
     assert data_frame_out["period"].iloc[-1] == 48
+
+
+def test_calculate_metrics(processor):
+    data_frame = pd.DataFrame({
+        "period": [1, 2],
+        "sell_price": [100, 200],
+        "buy_price": [160, 250],
+        "niv": [10, -5]
+    })
+
+    # Total daily imbalance cost = (10*160) + (-5*200) = 1600 - 1000 = 600
+    # Total absolute volume = 10 + 5 = 15
+    # Daily imbalance unit rate = 600 / 15 = 40
+
+    metrics = processor.calculate_metrics(data_frame)
+
+    assert metrics["total_daily_imbalance_cost"] == 600.0
+    assert metrics["daily_imbalance_unit_rate"] == 40.0
+
+
+def test_calculate_metrics_with_nans(processor):
+    data_frame = pd.DataFrame({
+        "period": [1, 2],
+        "sell_price": [10.5, np.nan],   # period 2 values will be ignored.
+        "buy_price": [160, 250],
+        "niv": [10, -5]
+    })
+
+    # Total daily imbalance cost = (10*160) = 1600
+    # Total absolute volume = 10
+    # Daily imbalance unit rate = 1600 / 10 = 160
+
+    metrics = processor.calculate_metrics(data_frame)
+
+    assert metrics["total_daily_imbalance_cost"] == 1600.0
+    assert metrics["daily_imbalance_unit_rate"] == 160.0
