@@ -3,6 +3,7 @@ import sys
 from datetime import date, timedelta
 from energy_report.client import ElexonClient
 from energy_report.processor import SettlementProcessor
+from energy_report.visualisation import plot_daily_metrics
 
 logging.basicConfig(
     level=logging.INFO,
@@ -35,7 +36,7 @@ def get_daily_report(settlement_date: str, client=None, processor=None):
     print(f"Total daily imbalance cost: £{cost:.2f}")
     print(f"Daily imbalance unit rate: £{rate:.2f}/MWh")
 
-    # TODO:visualisation (plotting)
+    plot_daily_metrics(clean_data_frame, settlement_date)
 
     return metrics
 

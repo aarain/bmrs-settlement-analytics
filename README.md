@@ -45,19 +45,31 @@ The following command runs the full test suite:
    pytest
    ```
 
+## Visualisation
+A visualisation report is generated automatically when running the `main.py` script and saved as a png file in the root 
+of the project.
+* Plotting both the sell and buy prices allows the trader to see any discrepancies.
+* The bar graph shows the net imbalance volume for each period compared to the buy/sell prices.
+Assuming the trader's position matches the net imbalance volume:
+  * If the prices and net imbalance volume are on the same side of the $x$-axis (at $y=0$), the trader likely is losing money.
+  * If the prices and net imbalance volume are on different sides of the $x$-axis (at $y=0$), the trader is likely gaining money.
+
+Here is an example visualisation for the 2026-04-22 settlement day:
+![Elexon System Prices vs NIV - 2026-04-22](report_2026-04-22.png)
+
 ## Assumptions and Trade-offs
-* Total daily imbalance cost = $\sum\limits_{n=1}^{48} (V_n \times P_n)$, such that $n$ is the period number, $V_n$ is
+* Total daily imbalance cost = $$\sum\limits_{n=1}^{48} (V_n \times P_n)$$ such that $n$ is the period number, $V_n$ is
 the net imbalance volume (at period $n$), and $P_n$ is either the system sell price (when $V_n < 0$) or the system buy
 price (when $V_n > 0$).
-  * Notation: $\sum\limits_{x=1}^{48} x = 1+2+3+...+48$.
+  * Notation: $$\sum\limits_{x=1}^{48} x = 1+2+3+...+48$$
   * The system sell price and system buy price are values defined relative to the national grid.
     * When the system has a surplus of energy (is "long"), the net imbalance volume is negative and the system needs
 to sell energy, so we calculate the sum use the system sell price value.
     * When the system has a deficit of energy (is "short"), the net imbalance volume is positive and the system needs
 to buy energy, so we calculate the sum use the system buy price value.
 * Daily imbalance unit rate = Total daily imbalance cost / Total absolute volume.
-  * Total absolute volume = $\sum\limits_{n=1}^{48} |V_n|$, such that $n$ is the period number, and $|V_n|$ is the
-absolute (non-negative) net imbalance volume at period $n$. 
+  * Total absolute volume = $$\sum\limits_{n=1}^{48} |V_n|$$ such that $n$ is the period number, and $|V_n|$ is the
+absolute (non-negative) net imbalance volume at period $n$.
 
 ## Notes
 
@@ -87,3 +99,4 @@ currently the settlement system prices only return a `netImbalanceVolume`.
 and `main.py` just the entry point for the script.
 * Allow the user to specify the desired report date when running the script.
 * Handle NaN values better when calculating metrics since ignoring entire periods can skew calculations.
+* Modify the plot generation so that both left and right y-axes align the 0 value.
