@@ -12,12 +12,15 @@ All the instructions in this README are targeting **Linux / MacOS** unless expli
 
 1. Ensure **Python 3.10** or greater is installed.
    * Verify the installation in a terminal by running `python --version` or `python3 --version`.
-2. Clone the repository and navigate to the directory root.
-3. Create a Python virtual environment (recommended):
+2. Ensure your **pip** Python package manager is installed and up to date.
+   * Verify the installation in a terminal by running `python -m pip --version` 
+3. Clone the repository and navigate to the directory root.
+4. Create a Python virtual environment (recommended):
    ```bash
+   # Replace 'python' with 'python3' if necessary.
    python -m venv venv
    ```
-4. Activate the virtual environment (recommended):
+5. Activate the virtual environment (recommended):
    #### Linux / MacOS
    ```bash
    source venv/bin/activate
@@ -26,7 +29,7 @@ All the instructions in this README are targeting **Linux / MacOS** unless expli
    ```powershell
    venv\Scripts\activate
    ```
-5. Install dependencies:
+6. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
@@ -116,7 +119,7 @@ but most 400 errors should not.
 * Add a second method in the client for retrieving the Indicated Imbalance Volumes (IIV);
 currently the settlement system prices only return a `netImbalanceVolume`.
 * Structure the project so that the logic from `main.py` is moved to another file within the `energy_report` package,
-and `main.py` just the entry point for the script.
+and `main.py` is just the entry point for the script.
 * Allow the user to specify the desired report date when running the script.
 * Handle NaN values better when calculating metrics since ignoring entire periods can skew calculations.
 * Modify the plot generation so that both left and right y-axes align the 0 value.
