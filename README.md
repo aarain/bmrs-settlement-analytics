@@ -58,20 +58,33 @@ Here is an example visualisation for the 2026-04-22 settlement day:
 ![Elexon System Prices vs NIV - 2026-04-22](report_2026-04-22.png)
 
 ## Assumptions and Trade-offs
-* Total daily imbalance cost = $$\sum\limits_{n=1}^{48} (V_n \times P_n)$$ such that $n$ is the period number, $V_n$ is
+* Total daily imbalance cost =
+
+$$\sum\limits_{n=1}^{48} (V_n \times P_n)$$
+
+such that $n$ is the period number, $V_n$ is
 the net imbalance volume (at period $n$), and $P_n$ is either the system sell price (when $V_n < 0$) or the system buy
 price (when $V_n > 0$).
-  * Notation: $$\sum\limits_{x=1}^{48} x = 1+2+3+...+48$$
+  * Notation:
+
+$$\sum\limits_{x=1}^{48} x = 1+2+3+...+48$$
+
   * The system sell price and system buy price are values defined relative to the national grid.
     * When the system has a surplus of energy (is "long"), the net imbalance volume is negative and the system needs
-to sell energy, so we calculate the sum use the system sell price value.
+to sell energy, so we calculate the sum using the system sell price value.
     * When the system has a deficit of energy (is "short"), the net imbalance volume is positive and the system needs
-to buy energy, so we calculate the sum use the system buy price value.
+to buy energy, so we calculate the sum using the system buy price value.
 * Daily imbalance unit rate = Total daily imbalance cost / Total absolute volume.
-  * Total absolute volume = $$\sum\limits_{n=1}^{48} |V_n|$$ such that $n$ is the period number, and $|V_n|$ is the
+  * Total absolute volume =
+
+$$\sum\limits_{n=1}^{48} |V_n|$$
+
+such that $n$ is the period number, and $|V_n|$ is the
 absolute (non-negative) net imbalance volume at period $n$.
 
 ## Notes
+
+### Design choices and Assumptions
 
 * Choosing a data format (json, xml, csv)
     * Industry standard for REST APIs
@@ -82,13 +95,20 @@ This ensures that if Elexon were to rename any of them, our code only has to cha
 field is referenced.
 * Assumption: A UK Settlement Day runs from 23:00 to 23:00 GMT, but the Elexon API handles this abstraction.
 * Assumption: `netImbalanceVolume` is measured in megawatt hours and the system buy/sell prices are measured in
-£ per megawatt hour. 
+£ per megawatt hour.
+* Scalability:
+  * New endpoints can be added to the client to retrieve different data sets by adding a new function similar to the
+`get_system_prices` function in `client.py`.
+  * Additional data cleaning (e.g. using forward filling to replace NaN values) can be added to the `process_prices`
+function in `processor.py`, and a new function could be added to calculate different sets of metrics for different
+visualisation plots similar to the `calculate_metrics` function.
 
-Future development:
+### Future development
+
 * Include an `api_key` member in the `ElexonClient` class for any future endpoints which require an API key.
 A secure way to handle an API key is to encrypt it (e.g. using `dotenvx`), and save the encrypted key in a `.env` file,
 which is safe to commit to a public repository. The GitHub secrets manager must then store the `DOTENV_PRIVATE_KEY`
-requred to decrypt the API key, injecting it into the runtime environment. This ensures that no secrets are exposed in
+required to decrypt the API key, injecting it into the runtime environment. This ensures that no secrets are exposed in
 the repository, and the API key is not saved in plaintext on any local device.
 * Include unit tests for logging.
 * Modify the `tenacity` decorator in the client to only retry specific errors i.e. most 500 errors should be retried
