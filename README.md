@@ -13,7 +13,7 @@ All the instructions in this README are targeting **Linux / MacOS** unless expli
 1. Ensure **Python 3.10** or greater is installed.
    * Verify the installation in a terminal by running `python --version` or `python3 --version`.
 2. Ensure your **pip** Python package manager is installed and up to date.
-   * Verify the installation in a terminal by running `python -m pip --version` 
+   * Verify the installation in a terminal by running `python -m pip --version` or `python3 -m pip --version`
 3. Clone the repository and navigate to the directory root.
 4. Create a Python virtual environment (recommended):
    ```bash
